@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JavaScript Runner</title>
+    <title>RunJS - JavaScript Runner</title>
     
     <!-- CodeMirror Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
@@ -40,10 +40,12 @@
             display: flex;
             flex: 1;
             padding: 10px;
-            gap: 10px;
+            gap: 5px;
+            overflow: hidden;
         }
         .editor, .output {
-            flex: 1;
+            flex-grow: 1;
+            width: 50%;
             display: flex;
             flex-direction: column;
             border: 1px solid #333;
@@ -84,17 +86,27 @@
             white-space: pre-wrap;
             font-size: 14px;
         }
+        .resizer {
+            width: 5px;
+            cursor: ew-resize;
+            background: #444;
+            transition: background 0.3s;
+        }
+        .resizer:hover {
+            background: #666;
+        }
     </style>
 </head>
 <body>
 
-    <div class="navbar">RunJS</div>
+    <div class="navbar">RunJS - JavaScript Runner</div>
 
     <div class="container">
         <div class="editor">
             <textarea id="jsCode"></textarea>
             <button onclick="runCode()">Run Code</button>
         </div>
+        <div class="resizer" id="resizer"></div>
         <div class="output">
             <pre id="output">Console output will appear here...</pre>
         </div>
@@ -137,6 +149,30 @@
             } catch (error) {
                 outputElement.innerHTML = `❌ Error: ${error.message}`;
             }
+        }
+
+        // Make panels resizable
+        const resizer = document.getElementById("resizer");
+        const editorPanel = document.querySelector(".editor");
+        const outputPanel = document.querySelector(".output");
+        let isResizing = false;
+
+        resizer.addEventListener("mousedown", (event) => {
+            isResizing = true;
+            document.addEventListener("mousemove", resize);
+            document.addEventListener("mouseup", () => {
+                isResizing = false;
+                document.removeEventListener("mousemove", resize);
+            });
+        });
+
+        function resize(event) {
+            if (!isResizing) return;
+            let containerWidth = document.querySelector(".container").offsetWidth;
+            let newEditorWidth = event.clientX - document.querySelector(".container").offsetLeft;
+            if (newEditorWidth < 200 || newEditorWidth > containerWidth - 200) return; // Prevent extreme sizes
+            editorPanel.style.width = `${newEditorWidth}px`;
+            outputPanel.style.width = `${containerWidth - newEditorWidth - 5}px`; // Adjust output width
         }
     </script>
 
