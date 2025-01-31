@@ -15,7 +15,7 @@ RunJS is a lightweight, browser-based JavaScript playground with a modern UI and
 
 RunJS is a Progressive Web App (PWA), so you can install it like a native app on your device.
 
-1. Open **[RunJS](https://simkeyur.github.io/jsfiddle/)** in your browser.
+1. Open **[RunJS](https://simkeyur.github.io/RunJS/)** in your browser.
 2. Click on the "Install" button (or "Add to Home Screen" on mobile).
 3. Use RunJS like a standalone app!
 
