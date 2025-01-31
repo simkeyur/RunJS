@@ -65,25 +65,59 @@
             autoCloseBrackets: true
         });
 
+        
         function runCode() {
             const code = editor.getValue();
             const outputElement = document.getElementById("output");
             outputElement.innerHTML = "";
-
+        
             try {
                 const log = [];
-                const oldConsoleLog = console.log;
-                console.log = function(message) {
-                    log.push(message);
-                    oldConsoleLog.apply(console, arguments);
+                
+                // Override console.log & console.dir
+                console.log = console.dir = function(...args) {
+                    args.forEach(arg => log.push(renderObject(arg)));
                 };
+        
                 new Function(code)();
-                console.log = oldConsoleLog;
+                
                 outputElement.innerHTML = log.join("\n") || "✅ No output";
             } catch (error) {
                 outputElement.innerHTML = `❌ Error: ${error.message}`;
             }
         }
+        
+        // Helper function to format objects in collapsible JSON-like view
+        function renderObject(obj) {
+            if (typeof obj === "object" && obj !== null) {
+                return `<details><summary>${getObjectSummary(obj)}</summary><pre>${syntaxHighlight(JSON.stringify(obj, null, 2))}</pre></details>`;
+            }
+            return obj; // Return primitive values directly
+        }
+        
+        // Helper function to get a summary for expandable object display
+        function getObjectSummary(obj) {
+            if (Array.isArray(obj)) {
+                return `Array(${obj.length})`;
+            }
+            return `Object { ${Object.keys(obj).slice(0, 3).join(", ")}${Object.keys(obj).length > 3 ? ", ..." : ""} }`;
+        }
+        
+        // Syntax highlighting for JSON output
+        function syntaxHighlight(json) {
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g, match => {
+                let cls = "number";
+                if (/^"/.test(match)) {
+                    cls = /:$/.test(match) ? "key" : "string";
+                } else if (/true|false/.test(match)) {
+                    cls = "boolean";
+                } else if (/null/.test(match)) {
+                    cls = "null";
+                }
+                return `<span class="${cls}">${match}</span>`;
+            });
+        }
+
 
         // Resizing Functionality
         const resizer = document.getElementById("resizer");
