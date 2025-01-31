@@ -5,102 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RunJS - JavaScript Runner</title>
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+
     <!-- CodeMirror Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-        .navbar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-            background: #000;
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-            box-shadow: 0px 2px 10px rgba(255, 255, 255, 0.1);
-            letter-spacing: 1px;
-        }
-        .container {
-            display: flex;
-            flex: 1;
-            padding: 10px;
-            gap: 5px;
-            overflow: hidden;
-        }
-        .editor, .output {
-            flex-grow: 1;
-            width: 50%;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid #333;
-            background: #1e1e1e;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
-        }
-        .CodeMirror {
-            flex: 1;
-            height: 100%;
-            font-size: 14px;
-            border-bottom: 1px solid #444;
-        }
-        button {
-            padding: 12px;
-            font-size: 16px;
-            background: #000;
-            color: white;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: all 0.3s ease-in-out;
-        }
-        button:hover {
-            background: #222;
-        }
-        #output {
-            flex: 1;
-            background: #222;
-            color: lime;
-            font-family: monospace;
-            padding: 10px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            font-size: 14px;
-        }
-        .resizer {
-            width: 5px;
-            cursor: ew-resize;
-            background: #444;
-            transition: background 0.3s;
-        }
-        .resizer:hover {
-            background: #666;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #121212; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        .navbar { display: flex; align-items: center; justify-content: center; padding: 15px; background: #000; color: white; font-size: 20px; font-weight: bold; box-shadow: 0px 2px 10px rgba(255, 255, 255, 0.1); }
+        .container { display: flex; flex: 1; padding: 10px; gap: 5px; overflow: hidden; }
+        .editor, .output { flex-grow: 1; width: 50%; display: flex; flex-direction: column; border: 1px solid #333; background: #1e1e1e; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); }
+        .CodeMirror { flex: 1; height: 100%; font-size: 14px; }
+        button { padding: 12px; font-size: 16px; background: #000; color: white; border: none; cursor: pointer; width: 100%; font-weight: bold; text-transform: uppercase; transition: all 0.3s; }
+        button:hover { background: #222; }
+        #output { flex: 1; background: #222; color: lime; font-family: monospace; padding: 10px; overflow-y: auto; white-space: pre-wrap; font-size: 14px; }
+        .resizer { width: 5px; cursor: ew-resize; background: #444; }
+        .resizer:hover { background: #666; }
     </style>
 </head>
 <body>
 
     <div class="navbar">RunJS - JavaScript Runner</div>
-
     <div class="container">
         <div class="editor">
             <textarea id="jsCode"></textarea>
@@ -112,13 +45,11 @@
         </div>
     </div>
 
-    <!-- CodeMirror Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
 
     <script>
-        // Initialize CodeMirror Editor
         const editor = CodeMirror.fromTextArea(document.getElementById("jsCode"), {
             mode: "javascript",
             theme: "dracula",
@@ -129,21 +60,16 @@
         function runCode() {
             const code = editor.getValue();
             const outputElement = document.getElementById("output");
-            outputElement.innerHTML = ""; // Clear previous output
+            outputElement.innerHTML = "";
 
             try {
-                // Capture console.log output
                 const log = [];
                 const oldConsoleLog = console.log;
                 console.log = function(message) {
                     log.push(message);
                     oldConsoleLog.apply(console, arguments);
                 };
-
-                // Run the JS code
                 new Function(code)();
-
-                // Restore console.log and display output
                 console.log = oldConsoleLog;
                 outputElement.innerHTML = log.join("\n") || "✅ No output";
             } catch (error) {
@@ -151,28 +77,11 @@
             }
         }
 
-        // Make panels resizable
-        const resizer = document.getElementById("resizer");
-        const editorPanel = document.querySelector(".editor");
-        const outputPanel = document.querySelector(".output");
-        let isResizing = false;
-
-        resizer.addEventListener("mousedown", (event) => {
-            isResizing = true;
-            document.addEventListener("mousemove", resize);
-            document.addEventListener("mouseup", () => {
-                isResizing = false;
-                document.removeEventListener("mousemove", resize);
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js').then(() => {
+                console.log('Service Worker Registered');
             });
-        });
-
-        function resize(event) {
-            if (!isResizing) return;
-            let containerWidth = document.querySelector(".container").offsetWidth;
-            let newEditorWidth = event.clientX - document.querySelector(".container").offsetLeft;
-            if (newEditorWidth < 200 || newEditorWidth > containerWidth - 200) return; // Prevent extreme sizes
-            editorPanel.style.width = `${newEditorWidth}px`;
-            outputPanel.style.width = `${containerWidth - newEditorWidth - 5}px`; // Adjust output width
         }
     </script>
 
