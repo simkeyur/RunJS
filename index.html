@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Runner</title>
+    
+    <!-- CodeMirror Styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            background: #000;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0px 2px 10px rgba(255, 255, 255, 0.1);
+            letter-spacing: 1px;
+        }
+        .container {
+            display: flex;
+            flex: 1;
+            padding: 10px;
+            gap: 10px;
+        }
+        .editor, .output {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #333;
+            background: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+        }
+        .CodeMirror {
+            flex: 1;
+            height: 100%;
+            font-size: 14px;
+            border-bottom: 1px solid #444;
+        }
+        button {
+            padding: 12px;
+            font-size: 16px;
+            background: #000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease-in-out;
+        }
+        button:hover {
+            background: #222;
+        }
+        #output {
+            flex: 1;
+            background: #222;
+            color: lime;
+            font-family: monospace;
+            padding: 10px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">RunJS</div>
+
+    <div class="container">
+        <div class="editor">
+            <textarea id="jsCode"></textarea>
+            <button onclick="runCode()">Run Code</button>
+        </div>
+        <div class="output">
+            <pre id="output">Console output will appear here...</pre>
+        </div>
+    </div>
+
+    <!-- CodeMirror Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+
+    <script>
+        // Initialize CodeMirror Editor
+        const editor = CodeMirror.fromTextArea(document.getElementById("jsCode"), {
+            mode: "javascript",
+            theme: "dracula",
+            lineNumbers: true,
+            autoCloseBrackets: true
+        });
+
+        function runCode() {
+            const code = editor.getValue();
+            const outputElement = document.getElementById("output");
+            outputElement.innerHTML = ""; // Clear previous output
+
+            try {
+                // Capture console.log output
+                const log = [];
+                const oldConsoleLog = console.log;
+                console.log = function(message) {
+                    log.push(message);
+                    oldConsoleLog.apply(console, arguments);
+                };
+
+                // Run the JS code
+                new Function(code)();
+
+                // Restore console.log and display output
+                console.log = oldConsoleLog;
+                outputElement.innerHTML = log.join("\n") || "✅ No output";
+            } catch (error) {
+                outputElement.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+    </script>
+
+</body>
+</html>
