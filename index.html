@@ -65,7 +65,6 @@
             autoCloseBrackets: true
         });
 
-        
         function runCode() {
             const code = editor.getValue();
             const outputElement = document.getElementById("output");
@@ -80,19 +79,41 @@
                 };
         
                 new Function(code)();
-                
+        
                 outputElement.innerHTML = log.join("\n") || "✅ No output";
             } catch (error) {
-                outputElement.innerHTML = `❌ Error: ${error.message}`;
+                outputElement.innerHTML = formatError(error, code);
             }
         }
         
-        // Helper function to format objects in collapsible JSON-like view
+        // Helper: Format errors with meaningful messages & stack trace
+        function formatError(error, code) {
+            let stackLines = error.stack.split("\n");
+            let errorMsg = `<span style="color: red; font-weight: bold;">❌ ${error.message}</span>`;
+        
+            // Extract the first meaningful line with file & line number
+            let relevantLine = stackLines.find(line => line.includes("anonymous")) || stackLines[1];
+        
+            if (relevantLine) {
+                let lineMatch = relevantLine.match(/<anonymous>:(\d+):(\d+)/);
+                if (lineMatch) {
+                    let lineNum = parseInt(lineMatch[1]) - 1; // Adjust for 0-based index
+                    let codeLines = code.split("\n");
+                    let errorLine = codeLines[lineNum]?.trim();
+        
+                    errorMsg += `<br><span style="color: orange;">🔍 Error at line ${lineNum + 1}:</span> <pre style="background:#222;padding:5px;border-radius:5px;">${errorLine || "(unknown line)"}</pre>`;
+                }
+            }
+        
+            return errorMsg;
+        }
+        
+        // Render objects in collapsible format
         function renderObject(obj) {
             if (typeof obj === "object" && obj !== null) {
                 return `<details><summary>${getObjectSummary(obj)}</summary><pre>${syntaxHighlight(JSON.stringify(obj, null, 2))}</pre></details>`;
             }
-            return obj; // Return primitive values directly
+            return obj;
         }
         
         // Helper function to get a summary for expandable object display
